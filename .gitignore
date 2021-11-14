@@ -1,0 +1,39 @@
+# MATLAB / Octave artifacts
+*.asv
+*.m~
+*.mex*
+*.oct
+*.mat
+*.fig
+*.slx
+*.mdl
+*.log
+slprj/
+octave-core
+octave-workspace
+
+# Build artifacts
+build/
+bin/mex/
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.a
+
+# Testing and outputs
+output/
+test_output/
+*.las
+*.ply
+*.geojson
+!examples/data/*.geojson
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.bak
