@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# chirp - Command-line interface launcher for FMCW Radar & SAR Perception Engine
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Check for Octave or MATLAB
+if command -v octave-cli >/dev/null 2>&1; then
+    OCTAVE_BIN="octave-cli --no-gui"
+elif command -v octave >/dev/null 2>&1; then
+    OCTAVE_BIN="octave --no-gui"
+elif command -v matlab >/dev/null 2>&1; then
+    OCTAVE_BIN="matlab -batch"
+else
+    echo "Error: Neither octave nor matlab found in PATH." >&2
+    echo "Please install GNU Octave or MATLAB to execute chirp." >&2
+    exit 1
+fi
+
+# Format arguments for MATLAB/Octave function call
+ARGS_STR=""
+for arg in "$@"; do
+    if [ -z "${ARGS_STR}" ]; then
+        ARGS_STR="'${arg}'"
+    else
+        ARGS_STR="${ARGS_STR}, '${arg}'"
+    fi
+done
+
+CMD="addpath('${SCRIPT_DIR}'); addpath('${PROJECT_ROOT}/src'); chirp_cli(${ARGS_STR});"
+exec ${OCTAVE_BIN} --eval "${CMD}"
