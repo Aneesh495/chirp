@@ -64,8 +64,11 @@ classdef VelocityAwareDbscan
                     currentCluster = currentCluster + 1;
                     clusterLabels(i) = currentCluster;
                     
-                    % Expand cluster
+                    % Expand cluster using FIFO queue without sorting
                     seedQueue = neighbors(neighbors ~= i);
+                    inQueue = false(1, N);
+                    inQueue(seedQueue) = true;
+                    inQueue(i) = true;
                     qIdx = 1;
                     
                     while qIdx <= length(seedQueue)
@@ -76,9 +79,14 @@ classdef VelocityAwareDbscan
                             visited(curPt) = true;
                             curNeighbors = kd.queryRadius(normPts(:, curPt), 1.0);
                             if length(curNeighbors) >= obj.MinPoints
-                                % Add new unique points to queue
-                                newPoints = curNeighbors(~visited(curNeighbors));
-                                seedQueue = unique([seedQueue, newPoints]);
+                                % Add new unique points in FIFO order
+                                for kNb = 1:length(curNeighbors)
+                                    nb = curNeighbors(kNb);
+                                    if ~inQueue(nb)
+                                        inQueue(nb) = true;
+                                        seedQueue = [seedQueue, nb];
+                                    end
+                                end
                             end
                         end
                         
