@@ -35,7 +35,6 @@ classdef DopplerAmbiguityResolver
         end
         
         function vExp = get.ExpandedVmax(obj)
-            % Expanded unambiguous velocity: V_exp = (Vmax1 * Vmax2) / abs(Vmax1 - Vmax2)
             dv = abs(obj.Vmax1 - obj.Vmax2);
             if dv < 1e-6
                 vExp = obj.Vmax1;
@@ -63,18 +62,23 @@ classdef DopplerAmbiguityResolver
             v2_span = 2.0 * obj.Vmax2;
             
             bestDiff = Inf;
+            bestAbsVel = Inf;
             trueVelocity = measuredV1;
             
-            % Search integer ambiguity hypothesis pairs (k1, k2)
             for k1 = -maxFolds:maxFolds
                 vCand1 = measuredV1 + k1 * v1_span;
                 for k2 = -maxFolds:maxFolds
                     vCand2 = measuredV2 + k2 * v2_span;
                     
                     diffVal = abs(vCand1 - vCand2);
-                    if diffVal < bestDiff
+                    meanVel = 0.5 * (vCand1 + vCand2);
+                    
+                    % Prioritize minimum difference, break near-ties by selecting minimum absolute velocity
+                    if diffVal < (bestDiff - 1e-6) || ...
+                       (abs(diffVal - bestDiff) <= 1e-6 && abs(meanVel) < bestAbsVel)
                         bestDiff = diffVal;
-                        trueVelocity = 0.5 * (vCand1 + vCand2);
+                        bestAbsVel = abs(meanVel);
+                        trueVelocity = meanVel;
                     end
                 end
             end

@@ -2,12 +2,11 @@ classdef MonopulseEstimator
     % MONOPULSEESTIMATOR Single-pulse amplitude and phase comparison monopulse angle estimation.
     %
     % Forms simultaneous sum (Sigma) and difference (Delta) beam patterns to estimate
-    % target off-boresight angle with high precision from a single snapshot:
-    %   theta_est = Re(Delta / Sigma) / km
+    % target off-boresight angle with high precision from a single snapshot.
     
     properties
-        MonopulseSlope = 1.6;         % Empirical/analytical error slope km (rad^(-1))
-        BeamwidthDeg = 15.0;          % 3-dB beamwidth of individual sub-array beams
+        MonopulseSlope = 10.0;        % Error slope km for phase/amplitude ratio
+        BeamwidthDeg = 15.0;          % Linear beamwidth envelope
     end
     
     methods
@@ -31,24 +30,29 @@ classdef MonopulseEstimator
             % Output:
             %   offBoresightDeg - Estimated angle in degrees relative to boresight
             
-            % Sum and Difference channel synthesis
             sigmaBeam = channelA + channelB;
             deltaBeam = channelA - channelB;
             
-            % Monopulse ratio: d_over_s = Re(Delta * conj(Sigma)) / |Sigma|^2
             denom = abs(sigmaBeam).^2;
             if denom <= 1e-12
                 offBoresightDeg = 0.0;
                 return;
             end
             
-            ratio = real(deltaBeam .* conj(sigmaBeam)) ./ denom;
+            rReal = real(deltaBeam .* conj(sigmaBeam)) ./ denom;
+            rImag = imag(deltaBeam .* conj(sigmaBeam)) ./ denom;
             
-            % Angle in radians
+            % Select dominant component (amplitude monopulse = real, phase monopulse = imag)
+            if abs(rReal) >= abs(rImag)
+                ratio = rReal;
+            else
+                ratio = -rImag;
+            end
+            
+            % Angle in degrees: for small angles theta_rad = ratio / km
             angleRad = ratio / obj.MonopulseSlope;
             offBoresightDeg = angleRad * (180.0 / pi);
             
-            % Clamp within valid linear monopulse beamwidth envelope
             maxAngle = obj.BeamwidthDeg * 0.75;
             offBoresightDeg = max(-maxAngle, min(maxAngle, offBoresightDeg));
         end
