@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  verify:
+    name: Build & Verify (GNU Octave & C MEX)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq octave liboctave-dev build-essential make
+
+      - name: Compile C MEX Acceleration Kernels
+        run: make mex
+
+      - name: Run Master Verification Harness (15 Test Suites)
+        run: make test
+
+      - name: Execute Performance Benchmarks
+        run: octave-cli --no-gui --eval "addpath('src'); addpath('bin/mex'); addpath('benchmarks'); run_benchmarks;"
+
+      - name: Verify Zero Em-Dash Policy Compliance
+        run: octave-cli --no-gui --eval "addpath('tests/audit'); test_no_em_dashes;"
