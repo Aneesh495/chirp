@@ -38,7 +38,7 @@ test:
 
 audit:
 	@echo "Running chirp mathematical invariant audit and negative controls..."
-	$(OCTAVE_CLI) --eval "addpath('src'); addpath('tests'); addpath('bin/mex'); test_negative_controls; test_mathematical_invariants; test_no_em_dashes;"
+	$(OCTAVE_CLI) --eval "addpath('src'); addpath('tests'); addpath('tests/audit'); addpath('bin/mex'); test_negative_controls; test_mathematical_invariants; test_no_em_dashes;"
 
 bench:
 	@echo "Running chirp computational benchmarks..."
