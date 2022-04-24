@@ -26,7 +26,7 @@ classdef LasWriter
             fwrite(fid, repmat(' ', 1, 32), 'char'); % System Identifier
             fwrite(fid, repmat(' ', 1, 32), 'char'); % Generating Software
             fwrite(fid, 0, 'uint16');             % Flight Date DOY
-            fwrite(fid, 2026, 'uint16');          % Year
+            fwrite(fid, 2022, 'uint16');          % Year
             fwrite(fid, 227, 'uint16');           % Header Size
             fwrite(fid, 227, 'uint32');           % Offset to Point Data
             fwrite(fid, 0, 'uint32');             % Number of Variable Length Records
