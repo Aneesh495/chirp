@@ -18,7 +18,7 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq octave liboctave-dev build-essential make
+          sudo apt-get install -y -qq octave octave-dev build-essential make
 
       - name: Compile C MEX Acceleration Kernels
         run: make mex
